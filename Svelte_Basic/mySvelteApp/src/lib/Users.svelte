@@ -1,23 +1,17 @@
 <div>
     <h1 class="text-2xl text-center mt-10">List of Users</h1>
-    <div class="ml-4 mt-4">
-    <label for="user-filter">Filter User</label>
-    <select name="user-filter" id="user-filter" class="border rounded-lg px-4 py-2 ml-4" on:change={filter}>
-      <option value="all">All</option>
-      <option value="active">Active</option>
-      <option value="inactive">Inactive</option>
-    </select>
-  </div>
-    {#each getUsers() as user,i(user.id)}
-    <User user={user} i={i}/>
+    <FilterUsers on:filter={filter}/>
+    {#each filteredUser as user,i(user.id)} 
+    <User user={user} i={i} on:remove={remove}/>
     {:else}
     <p>No user found</p>
     {/each}
   </div>
+    
   
   <script>
     import User from "./User.svelte";
-
+    import FilterUsers from "./FilterUsers.svelte";
 
     let users = [{
         id:1,
@@ -41,12 +35,20 @@
         active: false
     }
    ];
+ 
+   var filteredUser = users;
 
-   const getUsers =()=>{
-    return users;
+   const filter=(e)=>{
+    if(e.detail=="null"){
+      return filteredUser=users;
+    }
+    else{
+      const active = e.detail === "true";
+      return filteredUser = users.filter((ele)=>ele.active === active)
+    }
    }
 
-   const filter=()=>{
-    alert("Hii")
+   const remove=({detail})=>{
+      console.log(detail);
    }
   </script>
