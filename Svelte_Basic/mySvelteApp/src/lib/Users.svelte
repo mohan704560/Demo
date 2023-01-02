@@ -1,8 +1,15 @@
-<div>
+<div transition:fade>
     <h1 class="text-2xl text-center mt-10">List of Users</h1>
+    <div class="flex justify-between mx-4">
     <FilterUsers on:filter={filter}/>
+    <NewUsers on:newUser={add}/>
+  </div>
+  <progress max="10" value={$progress} class="w-full mx-4"/>
+  <!-- <progress max="10" min="0" value={$progress} class="w-full mx-4"/> -->
     {#each filteredUser as user,i(user.id)} 
-    <User user={user} i={i} on:remove={remove}/>
+    <div animate:flip={{delay:250, duration:1000, easing:quintOut}}>
+      <User user={user} i={i} on:remove={remove}/>
+    </div>
     {:else}
     <p>No user found</p>
     {/each}
@@ -12,43 +19,35 @@
   <script>
     import User from "./User.svelte";
     import FilterUsers from "./FilterUsers.svelte";
+    import NewUsers from "./NewUsers.svelte";
+    import {users, remove, add} from "../store"
+    import {tweened} from "svelte/motion"
+    import { onMount } from "svelte";
+    import {cubicIn, quintOut} from "svelte/easing"
+    import { fade } from "svelte/transition";
+    import { flip } from "svelte/animate";
 
-    let users = [{
-        id:1,
-        userImg : "https://i.pinimg.com/736x/64/81/22/6481225432795d8cdf48f0f85800cf66.jpg",
-        userName : "John",
-        userEmail: "John@bitfumes.com",
-        active:true
-    },
-    {   
-        id:2,
-        userImg : "https://tse4.mm.bing.net/th?id=OIP.ydzk1TTHOUmBDq8sIhZ9JwHaHa&pid=Api&P=0",
-        userName : "Niky",
-        userEmail: "Niky@bitfumes.com",
-        active: false,
-    },
-    {
-        id:3,
-        userImg : "https://tse4.mm.bing.net/th?id=OIP.DktG3bZwa6AYh76EbTrxsAHaHa&pid=Api&P=0",
-        userName : "Tanya",
-        userEmail: "Tanya@bitfumes.com",
-        active: false
-    }
-   ];
+    // _users.subscribe((value)=>(users=value));
  
-   var filteredUser = users;
+  $: filteredUser = $users;
 
    const filter=(e)=>{
     if(e.detail=="null"){
-      return filteredUser=users;
+      return filteredUser=$users;
     }
     else{
       const active = e.detail === "true";
-      return filteredUser = users.filter((ele)=>ele.active === active)
+      return filteredUser = $users.filter((ele)=>ele.active === active)
     }
    }
 
-   const remove=({detail})=>{
-      console.log(detail);
-   }
+  const progress = tweened(0,
+  {
+    duration:1000,
+    easing:cubicIn
+  });
+
+  onMount(()=>{
+    progress.set(filteredUser.length);
+  })
   </script>
